@@ -80,7 +80,7 @@ def start_download():
 # Set up the GUI
 root = tk.Tk()
 root.title("YouTube to MP3 Playlist Downloader")
-root.geometry("500x300")
+root.geometry("800x300")
 
 progress_queue = queue.Queue()
 
