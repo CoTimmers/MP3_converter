@@ -9,6 +9,7 @@ from collect_song_ids import search_video
 
 # Function to download a playlist and convert each song to mp3
 def download_playlist(playlist_id, output_path, progress_queue):
+    playlist_id = extract_playlist_id(playlist_id)
     playlist = get_playlist_tracks(playlist_id)
     if not playlist:
         progress_queue.put(("error", "Failed to retrieve playlist. Please check the playlist ID."))
@@ -23,6 +24,15 @@ def download_playlist(playlist_id, output_path, progress_queue):
         progress_queue.put(("progress", idx + 1, total_songs))  # Send progress to the queue
 
     progress_queue.put(("complete", "Playlist has been downloaded and converted to MP3!"))
+
+# Extract playlist ID from URL or validate ID
+def extract_playlist_id(input_text):
+    if "spotify.com/playlist/" in input_text:
+        # Extract ID from URL
+        start = input_text.find("playlist/") + len("playlist/")
+        end = input_text.find("?") if "?" in input_text else len(input_text)
+        return input_text[start:end]
+    return input_text
 
 # Function to handle progress updates from the queue
 def handle_progress():
