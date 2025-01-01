@@ -1,36 +1,55 @@
 import tkinter as tk
+import threading
+import queue
 from tkinter import filedialog, messagebox, ttk
 from download import youtube_to_mp3
 from collect_playlist import get_playlist_tracks
 from collect_song_ids import search_video
-import threading
+
 
 # Function to download a playlist and convert each song to mp3
-def download_playlist(playlist_id, output_path):
+def download_playlist(playlist_id, output_path, progress_queue):
     playlist = get_playlist_tracks(playlist_id)
     if not playlist:
-        messagebox.showerror("Error", "Failed to retrieve playlist. Please check the playlist ID.")
+        progress_queue.put(("error", "Failed to retrieve playlist. Please check the playlist ID."))
         return
     
     total_songs = len(playlist)
-    progress_bar["maximum"] = total_songs  # Set the maximum value of the progress bar
-
     for idx, song in enumerate(playlist):
         query = song["title"] + " " + song["artists"] + " lyrics"
         video_id = search_video(query)
         url = f"https://www.youtube.com/watch?v={video_id}"
         youtube_to_mp3(url, output_path)
-        progress_bar["value"] = idx + 1  # Update the progress bar value
-        root.update_idletasks()  # Refresh the GUI to show progress
+        progress_queue.put(("progress", idx + 1, total_songs))  # Send progress to the queue
 
-    messagebox.showinfo("Success", "Playlist has been downloaded and converted to MP3!")
-    progress_bar["value"] = 0  # Reset progress bar after completion
+    progress_queue.put(("complete", "Playlist has been downloaded and converted to MP3!"))
+
+# Function to handle progress updates from the queue
+def handle_progress():
+    try:
+        while not progress_queue.empty():
+            msg = progress_queue.get_nowait()
+            if msg[0] == "progress":
+                _, current, total = msg
+                progress_bar["value"] = current
+                progress_bar["maximum"] = total
+            elif msg[0] == "error":
+                messagebox.showerror("Error", msg[1])
+                return
+            elif msg[0] == "complete":
+                messagebox.showinfo("Success", msg[1])
+                progress_bar["value"] = 0  # Reset progress bar after completion
+    except queue.Empty:
+        pass
+    finally:
+        # Check the queue again after 100ms
+        root.after(100, handle_progress)
 
 # Browse for output directory
 def browse_output_directory():
     folder_selected = filedialog.askdirectory()
-    output_entry.delete(0, tk.END)  # Clear current text in the entry
-    output_entry.insert(0, folder_selected)  # Insert the selected folder
+    output_entry.delete(0, tk.END)
+    output_entry.insert(0, folder_selected)
 
 # Start the download process
 def start_download():
@@ -45,13 +64,15 @@ def start_download():
         messagebox.showwarning("Input Error", "Please select an output folder.")
         return
 
-    # Run the download process in a separate thread to avoid freezing the GUI
-    threading.Thread(target=download_playlist, args=(playlist_id, output_path)).start()
+    # Run the download process in a separate thread
+    threading.Thread(target=download_playlist, args=(playlist_id, output_path, progress_queue), daemon=True).start()
 
 # Set up the GUI
 root = tk.Tk()
 root.title("YouTube to MP3 Playlist Downloader")
-root.geometry("500x300")  # Increase window size to accommodate progress bar
+root.geometry("500x300")
+
+progress_queue = queue.Queue()
 
 # Label and entry for Spotify Playlist ID
 tk.Label(root, text="Spotify Playlist ID:").grid(row=0, column=0, padx=10, pady=10)
@@ -72,6 +93,9 @@ download_button.grid(row=2, column=1, pady=20)
 # Progress bar
 progress_bar = ttk.Progressbar(root, orient="horizontal", length=400, mode="determinate")
 progress_bar.grid(row=3, column=0, columnspan=3, padx=10, pady=10)
+
+# Start handling progress updates
+root.after(100, handle_progress)
 
 # Start the GUI event loop
 root.mainloop()

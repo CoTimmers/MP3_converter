@@ -1,17 +1,13 @@
-from config import YOUTUBE_API_KEY_1,YOUTUBE_API_KEY_2,YOUTUBE_API_KEY_3,YOUTUBE_API_KEY_4,YOUTUBE_API_KEY_5,YOUTUBE_API_KEY_6
+import os
+from dotenv import load_dotenv
 
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+load_dotenv()
+
 # List of API keys
-API_KEYS = [
-    YOUTUBE_API_KEY_1,
-    YOUTUBE_API_KEY_2,
-    YOUTUBE_API_KEY_3,
-    YOUTUBE_API_KEY_4,
-    YOUTUBE_API_KEY_5,
-    YOUTUBE_API_KEY_6
-]
+API_KEYS = os.getenv("YOUTUBE_API_KEYS").split(',')
 
 # Keep track of the current API key index
 current_key_index = 0
@@ -38,7 +34,6 @@ def search_video(query):
             part="snippet",
             type="video",
             maxResults=1,
-            #videoDuration=["short","medium"]
         )
         response = request.execute()
         video_id = response['items'][0]['id']['videoId']
@@ -53,7 +48,6 @@ def search_video(query):
         else:
             raise e  # Handle other errors normally
 
-#search_video("Sweater Weather The Neighbourhood lyrics")
 
 
 

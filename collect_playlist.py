@@ -1,12 +1,15 @@
-import spotipy
-from spotipy.oauth2 import SpotifyOAuth
-import config
+import os
+from dotenv import load_dotenv
+
 import requests
 import json
 import base64
 
-CLIENT_ID = config.SPOTIFY_CLIENT_ID
-CLIENT_SECRET = config.SPOTIFY_SECRET_CLIENT
+
+load_dotenv()
+
+CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
+CLIENT_SECRET = os.getenv("SPOTIFY_SECRET_CLIENT")
 
 # Function to get the access token
 def get_token():

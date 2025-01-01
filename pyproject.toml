@@ -16,6 +16,7 @@ spotipy = "^2.24.0"
 google-api-python-client = "^2.149.0"
 pyinstaller = "^6.10.0"
 tk = "^0.1.0"
+python-dotenv = "^1.0.1"
 
 
 [build-system]
