@@ -21,7 +21,7 @@ To run files inside your environment you need to activate it by running the foll
 poetry shell
 ```
 ### Add necessary files/folders
-Please add .env file containing 
+Please add .env file at the root of this repo containing: 
 - Spotify client ID, find here how to get one https://developer.spotify.com/documentation/web-api/tutorials/getting-started
 - Spotify secret client key, find here how to get one https://developer.spotify.com/documentation/web-api/tutorials/getting-started
 - Youtube API keys, find here how to get some https://developers.google.com/youtube/v3/getting-started?hl=fr
