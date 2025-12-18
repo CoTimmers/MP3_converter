@@ -1,0 +1,131 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube to MP3 Playlist Downloader</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1 {
+            color: #0056b3;
+        }
+        form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        input[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        progress {
+            width: 100%;
+            height: 25px;
+            margin-top: 20px;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        progress::-webkit-progress-bar {
+            background-color: #eee;
+            border-radius: 4px;
+        }
+        progress::-webkit-progress-value {
+            background-color: #28a745;
+            border-radius: 4px;
+        }
+        p#progress-text {
+            margin-top: 10px;
+            font-size: 1.1em;
+            color: #555;
+        }
+        a#download-link {
+            display: block;
+            margin-top: 20px;
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        a#download-link:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <h1>YouTube to MP3 Playlist Downloader</h1>
+    <form id="download-form">
+        <label for="playlist_id">Spotify Playlist ID or URL:</label><br>
+        <input type="text" id="playlist_id" name="playlist_id" size="50"><br><br>
+        <input type="submit" value="Download">
+    </form>
+    <br>
+    <progress id="progress-bar" value="0" max="100"></progress>
+    <p id="progress-text"></p>
+    <a id="download-link" style="display:none">Download Zip</a>
+
+    <script>
+        const form = document.getElementById('download-form');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const downloadLink = document.getElementById('download-link');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const response = await fetch('/download', {
+                method: 'POST',
+                body: formData
+            });
+            progressText.textContent = await response.text();
+
+            const eventSource = new EventSource('/progress');
+            eventSource.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.type === 'progress') {
+                    progressBar.value = data.current;
+                    progressBar.max = data.total;
+                    progressText.textContent = `Downloading song ${data.current} of ${data.total}`;
+                } else if (data.type === 'complete') {
+                    progressText.textContent = data.message;
+                    downloadLink.href = `/download_zip?path=${data.zip_path}`;
+                    downloadLink.style.display = 'block';
+                    eventSource.close();
+                } else if (data.type === 'error') {
+                    progressText.textContent = `Error: ${data.message}`;
+                    eventSource.close();
+                }
+            };
+        });
+    </script>
+</body>
+</html>
