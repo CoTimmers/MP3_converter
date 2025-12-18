@@ -1,32 +1,25 @@
 # MP3 Converter Project
-The goal of this repo is to download songs from a Spotify playlist
+The goal of this repo is to download songs from a Spotify playlist using a web interface.
 
-## Requirements
-- Python 3.9 or higher
-- Poetry for dependency management, you can find here how to install it: https://python-poetry.org/docs/
+## Prerequisites
+- Docker and Docker Compose (recommended)
+- OR Python 3.9 or higher
 
-## Installation through poetry
+## Setup
 
-### Cloning git repo
+### 1. Clone the repository
 ```bash
 git clone https://github.com/CoTimmers/MP3_converter.git
+cd MP3_converter
 ```
-Navigate to the MP3 COnverter folder inside your terminal. Install dependencies using Poetry:
-```bash
-poetry install
-```
-This will create a virtual environment (.venv), please ensure it has been created inside the root of this repo.
-To run files inside your environment you need to activate it by running the following command : 
-```bash
-poetry shell
-```
-### Add necessary files/folders
-Please add .env file at the root of this repo containing: 
-- Spotify client ID, find here how to get one https://developer.spotify.com/documentation/web-api/tutorials/getting-started
-- Spotify secret client key, find here how to get one https://developer.spotify.com/documentation/web-api/tutorials/getting-started
-- Youtube API keys, find here how to get some https://developers.google.com/youtube/v3/getting-started?hl=fr
-  
-The .env file should be as in the following example (the keys are fictionnal)
+
+### 2. Create .env file
+Create a `.env` file in the project root containing:
+- Spotify client ID - [Get one here](https://developer.spotify.com/documentation/web-api/tutorials/getting-started)
+- Spotify secret client key - [Get one here](https://developer.spotify.com/documentation/web-api/tutorials/getting-started)
+- YouTube API keys - [Get some here](https://developers.google.com/youtube/v3/getting-started?hl=fr)
+
+Example `.env` file (keys are fictional):
 
 ```bash
 SPOTIFY_CLIENT_ID = "9a71eedejece374hdncdjs248"
@@ -34,11 +27,63 @@ SPOTIFY_SECRET_CLIENT = "fc2c423hed3788h249"
 
 YOUTUBE_API_KEYS = AIzaSyCZNWcJyeid348uejx,AIzaSyDCwsmPE68J0odeY6H
 ```
-DO NOT commit your .env file  
-## Running
 
-Run the main.py file. 
-Then enter the playlist ID. To find the playlist ID please browse to your spotify playlist, click on the three dots next to the playlist -> share -> copy link to the playlist. Paste that in the Spotify playlist ID field.
+**DO NOT commit your .env file**
+
+## Running the Application
+
+### Option 1: Using Docker Compose (Recommended)
+
+```bash
+# Build and start the container
+docker-compose up --build
+
+# Or run in detached mode (background)
+docker-compose up -d --build
+```
+
+Then open your browser to `http://localhost:5000`
+
+To stop:
+```bash
+docker-compose down
+```
+
+### Option 2: Using Python directly
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the Flask app
+python app.py
+```
+
+Then open your browser to `http://localhost:5000`
+
+### Option 3: Using Poetry
+
+```bash
+# Install dependencies
+poetry install
+
+# Activate the virtual environment
+poetry shell
+
+# Run the Flask app
+python app.py
+```
+
+Then open your browser to `http://localhost:5000`
+
+## Usage
+
+1. Open `http://localhost:5000` in your browser
+2. Enter your Spotify playlist ID or URL
+   - To find the playlist ID: Browse to your Spotify playlist → Click the three dots → Share → Copy link to playlist
+   - You can paste either the full URL or just the playlist ID
+3. Click download and wait for the process to complete
+4. Download the ZIP file containing all MP3s
 
 
 
